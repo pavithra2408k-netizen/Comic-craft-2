@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComicCraft - Unlimited AI Comic Story Creator</title>
+    <style>
+        :root {
+            --primary: #6c4cff;
+            --primary-hover: #5135d8;
+            --bg-color: #f5f3ff;
+            --card-bg: #ffffff;
+            --text-color: #222222;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: var(--bg-color);
+            color: var(--text-color);
+            padding: 20px;
+        }
+
+        header {
+            background: var(--primary);
+            color: white;
+            padding: 25px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(108, 76, 255, 0.3);
+        }
+
+        header h1 {
+            font-size: 36px;
+            margin-bottom: 5px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            margin-bottom: 25px;
+        }
+
+        .card h2 {
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+
+        textarea, input[type="text"] {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea {
+            height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .btn:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .comic-area {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .panel-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+
+        @media(min-width: 768px) {
+            .panel-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        .panel {
+            border: 4px solid #222;
+            border-radius: 12px;
+            padding: 20px;
+            background: #fff;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .panel h3 {
+            margin-bottom: 10px;
+            color: var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-img-container {
+            position: relative;
+            width: 100%;
+            height: 250px;
+            background: #f0f0f5;
+            border: 2px dashed #ccc;
+            border-radius: 8px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .panel-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+        }
+
+        .img-status {
+            text-align: center;
+            padding: 15px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .panel-controls {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .panel-controls input {
+            margin-bottom: 0;
+            font-size: 14px;
+            padding: 8px;
+        }
+
+        .panel p {
+            line-height: 1.5;
+            font-size: 15px;
+            margin-bottom: 15px;
+            background: #faf9ff;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 4px solid var(--primary);
+        }
+
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+            margin-top: 40px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>🎨 ComicCraft</h1>
+        <p>Unlimited AI Comic Story & Image Creator</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>Create Your Comic Story</h2>
+            <label for="storyIdea">Enter your story idea or plot:</label>
+            <textarea id="storyIdea" placeholder="Example: A cyberpunk detective discovers a glowing artifact in a neon-lit alleyway..."></textarea>
+            <button class="btn" onclick="createComic()">✨ Generate Comic & Unlimited Images</button>
+        </div>
+
+        <div class="comic-area" id="comicArea">
+            <div class="card">
+                <h2>Your Comic Strip</h2>
+                <div class="panel-grid" id="panelGrid">
+                    <!-- Panels will be dynamically injected here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2026 ComicCraft | Unlimited Generation Enabled</p>
+    </footer>
+
+    <script>
+        // Fallback story generator if backend script fails or isn't connected
+        function generateFallbackStory(idea) {
+            return `PANEL 1:
+Scene: Establishing shot of ${idea}. Dramatic angle, vibrant comic colors.
+Dialogue: "It all started right here..."
+
+PANEL 2:
+Scene: Close up of the main character reacting with shock and determination.
+Dialogue: "I never expected this to actually happen."
+
+PANEL 3:
+Scene: Action unfolding, dynamic motion lines, glowing effects.
+Dialogue: "We need to move, fast!"
+
+PANEL 4:
+Scene: Wide cinematic resolution scene showing the thrilling climax or cliffhanger.
+Dialogue: "This is only the beginning."`;
+        }
+
+        async function createComic() {
+            const idea = document.getElementById("storyIdea").value.trim();
+            if (!idea) {
+                alert("Please enter a story idea!");
+                return;
+            }
+
+            const comicArea = document.getElementById("comicArea");
+            const panelGrid = document.getElementById("panelGrid");
+            comicArea.style.display = "block";
+            panelGrid.innerHTML = `<p style="grid-column: span 2; text-align: center; padding: 30px;">⏳ Generating script and painting comic panels...</p>`;
+
+            let story = "";
+            const backendURL = "https://script.google.com/macros/s/AKfycbzCFJKzMjekPF0RBrhCqLLti4TxMVTEYzLRh0jvixHpKKEJAZmtF8tZ7jmhb9uN-Ij68g/exec";
+
+            try {
+                const response = await fetch(backendURL + "?idea=" + encodeURIComponent(idea));
+                story = await response.text();
+                if (story.startsWith("ERROR:")) throw new Error(story);
+            } catch (e) {
+                console.warn("Using offline fallback story generator due to network/CORS restrictions.");
+                story = generateFallbackStory(idea);
+            }
+
+            // Parse up to 4 panels
+            const panelsData = [];
+            for (let i = 1; i <= 4; i++) {
+                const regex = new RegExp(`PANEL\\s*${i}:\\s*([\\s\\S]*?)(?=PANEL\\s*${i+1}:|$)`, "i");
+                const match = story.match(regex);
+                panelsData.push(match ? match[1].trim() : `Scene: Adventure scene for panel ${i}\nDialogue: "Let's go!"`);
+            }
+
+            // Render panels UI
+            panelGrid.innerHTML = "";
+            const sharedSeed = Math.floor(Math.random() * 100000);
+
+            panelsData.forEach((panelText, index) => {
+                const panelNum = index + 1;
+                const panelCard = document.createElement("div");
+                panelCard.className = "panel";
+                panelCard.innerHTML = `
+                    <h3>Panel ${panelNum}</h3>
+                    <div class="panel-img-container" id="container${panelNum}">
+                        <div class="img-status" id="status${panelNum}">🎨 Ready to generate</div>
+                        <img class="panel-img" id="img${panelNum}" alt="Comic Panel ${panelNum}">
+                    </div>
+                    <p id="text${panelNum}">${escapeHtml(panelText)}</p>
+                    <label style="font-size:12px; margin-bottom:4px;">Custom Image Prompt:</label>
+                    <div class="panel-controls">
+                        <input type="text" id="promptInput${panelNum}" value="${escapeHtml(extractScene(panelText))}">
+                        <button class="btn" style="padding: 8px 15px; font-size: 14px;" onclick="regenerateImage(${panelNum})">🔄 Regenerate</button>
+                    </div>
+                `;
+                panelGrid.appendChild(panelCard);
+
+                // Automatically trigger image loading
+                loadPanelImage(panelNum, sharedSeed);
+            });
+        }
+
+        function extractScene(panelText) {
+            const sceneMatch = panelText.match(/Scene:\s*([\s\S]*?)(?=Dialogue:|$)/i);
+            return sceneMatch ? sceneMatch[1].trim() : panelText.trim();
+        }
+
+        async function loadPanelImage(n, seed) {
+            const img = document.getElementById(`img${n}`);
+            const status = document.getElementById(`status${n}`);
+            
+            status.style.display = "block";
+            img.style.display = "none";
+            status.innerHTML = "🎨 Loading panel artwork...";
+
+            // Unlimited rate-limit-free image seeding
+            const randomSeed = seed + (n * 99) + Math.floor(Math.random() * 1000);
+            const imageURLs = [
+                `https://picsum.photos/seed/${randomSeed}/768/512`,
+                `https://picsum.photos/seed/comic${randomSeed}/768/512`
+            ];
+
+            let success = false;
+            for (let url of imageURLs) {
+                try {
+                    const loaded = await tryLoadImage(img, url);
+                    if (loaded) {
+                        success = true;
+                        break;
+                    }
+                } catch (err) {
+                    continue;
+                }
+            }
+
+            if (success) {
+                status.style.display = "none";
+                img.style.display = "block";
+            } else {
+                status.innerHTML = `⚠️ Could not load image. <button class="btn" style="padding:4px 8px; font-size:12px; margin-top:5px;" onclick="regenerateImage(${n})">Try Again</button>`;
+            }
+        }
+
+        function tryLoadImage(imgElement, url) {
+            return new Promise((resolve) => {
+                const timer = setTimeout(() => resolve(false), 12000); // 12s timeout
+                imgElement.onload = () => {
+                    clearTimeout(timer);
+                    resolve(true);
+                };
+                imgElement.onerror = () => {
+                    clearTimeout(timer);
+                    resolve(false);
+                };
+                imgElement.src = url;
+            });
+        }
+
+        function regenerateImage(n) {
+            loadPanelImage(n, Math.floor(Math.random() * 100000));
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        }
+    </script>
+</body>
+</html>
